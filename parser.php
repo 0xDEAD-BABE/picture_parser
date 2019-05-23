@@ -1,6 +1,6 @@
 <?php 
-include('./simple_html_dom.php');
-include('./custom_extractor.php'); 
+require('simple_html_dom.php');
+require('custom_extractor.php'); 
 set_time_limit(0);
 
 if (!isset($_GET['url']) || empty($_GET['url'])) {
@@ -24,13 +24,17 @@ function renderImgs(array $pic_urls) {
 	echo $imgs;
 }
 
+//download content from urls and return info text for ajax output
 function saveImgs(array $pic_urls) {
 	global $dir;
 	$subdir = $dir . substr(md5(join($pic_urls)), 1, 8) . "/";
+
+	 // prevent concurrent downloading of same urls in case of multiprocess run. 
+	 // unique directory name works like mutex. each process handle diferent directory.
 	if(is_dir($subdir)) return "skiped all";
+
 	mkdir($subdir);
 	$counter = 0;
-
 	foreach ($pic_urls as $url) {
 		if(!$file = @file_get_contents($url)) continue;
 		$name = substr(md5($url), 1, 6) . ".jpg";
